@@ -87,7 +87,7 @@ OpenBCI_Ganglion::OpenBCI_Ganglion(){
     config_LIS2DH();
     config_MCP3912(g, s);
     updateDAC(DACmidline);  // place DAC into V/2 position
-    loadString("OpenBCI Ganglion v",18,false); loadString((char*)SimbleeBLE.softwareRevision, 5, true);
+    loadString("OpenBCI Ganglion (Analog) v",27,false); loadString((char*)SimbleeBLE.softwareRevision, 5, true);
     for (int i = 2; i <= advdata[0]; i++) {
       loadChar(advdata[i], false);
     }
@@ -101,8 +101,8 @@ OpenBCI_Ganglion::OpenBCI_Ganglion(){
 
     loadString("send 'b' to start data stream", 29, true);
     loadString("send 's' to stop data stream", 28, true);
-    loadString("use 1,2,3,4 to turn OFF channels", 32, true);
-    loadString("use !,@,#,$ to turn ON channels", 31, true);
+    loadString("use 1,2,3,4 to read analog channels", 35, true);
+    loadString("use !,@,#,$ to read impedance channels", 38, true);
     loadString("send '?' to print all registers", 31, true);
     loadString("send 'v' to initialize board", 28, true);
     loadString("send '[' ']' to enable/disable synthetic square wave", 53, true);
@@ -146,6 +146,7 @@ OpenBCI_Ganglion::OpenBCI_Ganglion(){
         incrementSyntheticChannelData();
       } else {
         updateMCPdata();
+        updateAnalogData();
         if (useAccel) updateAccelerometerData();
       }
       if (sampleCounter == 0) {
@@ -190,11 +191,13 @@ OpenBCI_Ganglion::OpenBCI_Ganglion(){
           loadString("Activating channel ", 19, false); loadInt(chan, true);
         }
         channelMask &= channelEnable[chan - 1]; // turn on the channel
+        analogOverwrite[chan - 1] = false; // turn off analog overwrite
       } else {
         if(!was_running_when_called){
           loadString("Deactivating channel ", 21, false); loadInt(chan, true);
         }
         channelMask |= channelDisable[chan - 1]; // turn off the channel
+        analogOverwrite[chan - 1] = true; // turn on analog overwrite
       }
       if (!was_running_when_called){
         prepToSendBytes();
@@ -706,7 +709,7 @@ OpenBCI_Ganglion::OpenBCI_Ganglion(){
       // int byteCounter = 0;
       digitalWrite(MCP_SS, LOW);
       MCP_sendCommand(channelAddress[0], MCP_READ); // send request to read from CHAN_0 address
-      for (int i = 0; i < 4; i++) {
+      for (int i = 0; i < 4; i++) { 
         channelData[i] = MCP_readRegister();  // read the 24bit result into the long variable array
         // for (int j = 16; j >= 0; j -= 8) {
         //   rawChannelData[byteCounter] = (channelData[i] >> j & 0xFF); // fill the raw data array for streaming
@@ -715,11 +718,20 @@ OpenBCI_Ganglion::OpenBCI_Ganglion(){
       }
       digitalWrite(MCP_SS, HIGH);
       // this section corrects the sign on the long array
-      for (int i = 0; i < 4; i++) {
+      for (int i = 0; i < 4; i++) { 
         if ((channelData[i] & 0x00800000) > 0) {
           channelData[i] |= 0xFF000000;
         } else {
           channelData[i] &= 0x00FFFFFF;
+        }
+      }
+    }
+
+    void OpenBCI_Ganglion::updateAnalogData(){
+      // overwrite changel 1-4.
+      for (int i = 0; i < 4; i++) { 
+        if(analogOverwrite[i]) {
+          channelData[i] = (analogRead(i + 2) - 512) * 2000;
         }
       }
     }
