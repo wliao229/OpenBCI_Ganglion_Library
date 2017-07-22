@@ -694,6 +694,7 @@ OpenBCI_Ganglion::OpenBCI_Ganglion(){
 
     void OpenBCI_Ganglion::config_MCP3912(unsigned long gain, unsigned long sampleRate) {
       sampleRate |= 0x003CE050; // dither on max, boost 2x, OSR 4096,
+      // sampleRate |= 0x003BE050; // 400Hz?
       // digitalWrite(MCP_RST, LOW); delay(50);
       // digitalWrite(MCP_RST, HIGH); delay(300);
       digitalWrite(MCP_SS, LOW);
