@@ -1,1 +1,8 @@
+<<<<<<< HEAD
 .DS_Store
+=======
+.idea
+.DS_Store
+.metadata/
+RemoteSystemsTempFiles/
+>>>>>>> ad6c5b38442fb521ad31275a69e3d150e4f6c579
