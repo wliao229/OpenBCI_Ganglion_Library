@@ -277,7 +277,11 @@ public:
   boolean writingToSD = false;
   boolean useSerial = false; // used for testing stuph
   int syntheticFrequency = 500;
+  
+  // Wang: Adding things for analogue reading
 
+  void updateAnalogData(void);
+  boolean analogOverwrite[4] = {false, false, false, false};
 };
 
 extern OpenBCI_Ganglion ganglion;

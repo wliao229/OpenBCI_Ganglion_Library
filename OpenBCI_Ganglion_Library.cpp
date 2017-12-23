@@ -147,6 +147,16 @@ boolean OpenBCI_Ganglion::startRunning(void) {
   return is_running;
 }
 
+// UPDATE ANALOGDATA
+void OpenBCI_Ganglion::updateAnalogData(){
+    // overwrite changel 1-4.
+    for (int i = 0; i < 4; i++) { 
+      if(analogOverwrite[i]) {
+        channelData[i] = (analogRead(i + 2) - 512) * 2000;
+      }
+    }
+  }
+
 void OpenBCI_Ganglion::processData() {
   MCP_dataReady = false;
   if(sampleCounter >= 201){ sampleCounter = 0; }
@@ -213,11 +223,13 @@ int OpenBCI_Ganglion::changeChannelState_maintainRunningState(int chan, int star
       loadString("Activating channel "); loadInt(chan, true);
     }
     channelMask &= channelEnable[chan - 1]; // turn on the channel
+    analogOverwrite[chan - 1] = false; // turn off analog overwrite
   } else {
     if(!was_running_when_called){
       loadString("Deactivating channel "); loadInt(chan, true);
     }
     channelMask |= channelDisable[chan - 1]; // turn off the channel
+    analogOverwrite[chan - 1] = true; // turn on analog overwrite
   }
   if (!was_running_when_called){
     prepToSendBytes();
@@ -770,6 +782,11 @@ void OpenBCI_Ganglion::updateMCPdata() {
   MCP_sendCommand(channelAddress[0], MCP_READ); // send request to read from CHAN_0 address
   for (int i = 0; i < 4; i++) {
     channelData[i] = MCP_readRegister();  // read the 24bit result into the long variable array
+
+    if(analogOverwrite[i]) {
+        channelData[i] = (analogRead(i + 2) - 512) * 2000; // overwrite with analog pin.
+      }
+
     if(wifi.present && wifi.tx){
       for (int j = 16; j >= 0; j -= 8) {
         wifi.storeByteBufTx(channelData[i] >> j & 0xFF); // fill the raw data array for streaming
