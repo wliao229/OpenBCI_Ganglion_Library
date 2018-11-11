@@ -152,7 +152,7 @@ void OpenBCI_Ganglion::updateAnalogData(){
     // overwrite changel 1-4.
     for (int i = 0; i < 4; i++) { 
       if(analogOverwrite[i]) {
-        channelData[i] = (analogRead(i + 2) - 512) * 2000;
+        channelData[i] = (analogRead(i + 2) - 512) * 1500;
       }
     }
   }
@@ -784,7 +784,7 @@ void OpenBCI_Ganglion::updateMCPdata() {
     channelData[i] = MCP_readRegister();  // read the 24bit result into the long variable array
 
     if(analogOverwrite[i]) {
-        channelData[i] = (analogRead(i + 2) - 512) * 2000; // overwrite with analog pin.
+        channelData[i] = (analogRead(i + 2) - 512) * 1500; // overwrite with analog pin.
       }
 
     if(wifi.present && wifi.tx){
