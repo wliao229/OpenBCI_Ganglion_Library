@@ -67,7 +67,7 @@ void OpenBCI_Ganglion::makeUniqueId() {
   SimbleeBLE.manufacturerName = "openbci.com";
   SimbleeBLE.modelNumber = "Ganglion";
   SimbleeBLE.hardwareRevision = "1.0.1";
-  SimbleeBLE.softwareRevision = "2.0.0";
+  SimbleeBLE.softwareRevision = "2.0.1";
 }
 
 void OpenBCI_Ganglion::blinkLED() {
@@ -1033,6 +1033,7 @@ void OpenBCI_Ganglion::loadNewLine() {
   if (commandFromSPI) {
     if (wifi.present && wifi.tx) {
       wifi.sendStringMulti("\n");
+      delay(1);
     }
   } else {
     serialBuffer[bufferLevel][serialIndex[bufferLevel]] = '\n';
@@ -1047,6 +1048,7 @@ void OpenBCI_Ganglion::loadString(const char* thatString, int numChars, boolean 
   if (commandFromSPI) {
     if (wifi.present && wifi.tx) {
       wifi.sendStringMulti(thatString);
+      delay(1);
     }
   } else {
     for (int i = 0; i < numChars; i++) {
@@ -1099,6 +1101,7 @@ void OpenBCI_Ganglion::loadChar(char thatChar, boolean addNewLine) {
   if (commandFromSPI) {
     if (wifi.present && wifi.tx) {
       wifi.sendStringMulti(&thatChar);
+      delay(1);
     }
   } else {
     serialBuffer[bufferLevel][serialIndex[bufferLevel]] = thatChar;
@@ -1148,6 +1151,7 @@ void OpenBCI_Ganglion::loadInt(int i, boolean addNewLine) {
     if (commandFromSPI) {
       if (wifi.present && wifi.tx) {
         wifi.sendStringMulti(digit[i]);
+        delay(1);
       }
     } else {
       serialBuffer[bufferLevel][serialIndex[bufferLevel]] = digit[i];
